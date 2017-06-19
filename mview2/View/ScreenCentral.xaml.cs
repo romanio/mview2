@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
+using OxyPlot;
+using OxyPlot.Series;
 
 namespace mview2
 {
@@ -21,9 +23,12 @@ namespace mview2
     /// </summary>
     public partial class ScreenCentral : Window
     {
+        ScreenCentralModel Model = new ScreenCentralModel();
+
         public ScreenCentral()
         {
             InitializeComponent();
+            this.DataContext = Model;
         }
 
         EclipseProject ecl = new EclipseProject();

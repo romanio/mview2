@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:mview2"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
@@ -16,5 +17,6 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Button Grid.Row="0" Grid.Column="0" Content="Open model" Click="OpenModel" />
+        <oxy:PlotView Grid.Column="0" Model="{Binding PlotModel}" Grid.Row="1" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>
