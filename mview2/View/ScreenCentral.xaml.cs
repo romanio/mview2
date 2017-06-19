@@ -12,17 +12,33 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 
 namespace mview2
 {
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class ScreenCentral : Window
     {
-        public MainWindow()
+        public ScreenCentral()
         {
             InitializeComponent();
+        }
+
+        EclipseProject ecl = new EclipseProject();
+
+        private void OpenModel(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog()
+            {
+                Filter = "Eclipse file|*.SMSPEC"
+            };
+
+            if (ofd.ShowDialog() == true)
+            {
+                ecl.OpenData(ofd.FileName);
+            }
         }
     }
 }
