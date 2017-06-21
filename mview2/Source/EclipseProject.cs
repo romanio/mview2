@@ -8,6 +8,41 @@ using System.Text.RegularExpressions;
 
 namespace mview2
 {
+    public enum NameOptions
+    {
+        Aquifer,
+        Block,
+        Completion,
+        Field,
+        Group,
+        LGBlock,
+        LGCompletion,
+        LGWell,
+        Network,
+        Region,
+        RegionFlows,
+        RegionComponent,
+        WellSegment,
+        Well,
+        Other
+    }
+    public struct VectorData
+    {
+        public int index;
+        public string keyword;
+        public string measurement;
+        public string unit;
+    }
+
+    public class Vector
+    {
+        public NameOptions Type;
+        public string Name;
+        public int Num;
+        public List<VectorData> Data = new List<VectorData>();
+    }
+
+
     public class EclipseProject
     {
         public string FILENAME;
@@ -15,10 +50,13 @@ namespace mview2
         public string PATH;
         public Dictionary<string, string> FILES;
         public Summary SUMMARY = null;
+        public List<Vector> VECTORS = null;
+
 
         public void OpenData(string filename)
         {
             // Следует разобраться со структурой файлов в директории
+
             FILENAME = filename;
             ROOT = Path.GetFileNameWithoutExtension(FILENAME).ToUpper();
             PATH = Path.GetDirectoryName(FILENAME).ToUpper();
@@ -56,7 +94,29 @@ namespace mview2
 
         void ProceedSUMMARY()
         {
+            var temp = new List<Vector>();
 
+            for (int iw = 0; iw < SUMMARY.KEYWORDS.Length; ++iw)
+            {
+                if (SUMMARY.KEYWORDS[iw].StartsWith("F"))
+                    temp.Add(new Vector { Type = NameOptions.Field, Name = SUMMARY.WGNAMES[iw] });
+
+                if (SUMMARY.KEYWORDS[iw].StartsWith("W"))
+                    temp.Add(new Vector { Type = NameOptions.Well, Name = SUMMARY.WGNAMES[iw] });
+
+                if (SUMMARY.KEYWORDS[iw].StartsWith("G"))
+                    temp.Add(new Vector { Type = NameOptions.Group, Name = SUMMARY.WGNAMES[iw] });
+
+                if (SUMMARY.KEYWORDS[iw].StartsWith("A"))
+                    temp.Add(new Vector { Type = NameOptions.Aquifer, Name = SUMMARY.WGNAMES[iw] + SUMMARY.NUMS[iw].ToString() });
+
+                if (SUMMARY.KEYWORDS[iw].StartsWith("R"))
+                    temp.Add(new Vector { Type = NameOptions.Aquifer, Name = SUMMARY.WGNAMES[iw] + SUMMARY.NUMS[iw].ToString() });
+            }
+
+            // Удаляем повторяющиеся элементы
+
+            VECTORS = temp.GroupBy(c => new { c.Name, c.Type, c.Num }).Select(g => g.First()).ToList();
         }
     }
 }
