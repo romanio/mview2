@@ -20,6 +20,9 @@ namespace mview2
         public string[] WGNAMES = null; // Имена скважин или групп
         public string[] WGUNITS = null; // Размерность ключевого слова
         public string[] MEASRMNT = null;
+        public List<float[]> DATA = null; // Расчётные показатели
+        public int TINDEX; // Индекс вектора TIME
+        public int NTIME; // Количество временных шагов
 
         public Summary(string filename)
         {
@@ -109,6 +112,30 @@ namespace mview2
                 br.SkipEclipseData();
             }
             br.CloseBinaryFile();
+        }
+
+        public void ReadUNSMRY(string filename)
+        {
+            FileReader br = new FileReader();
+            br.OpenBinaryFile(filename);
+            if (br.Length > 0)
+            {
+                DATA = new List<float[]>();
+
+                while (br.Position < br.Length - 24)
+                {
+                    br.ReadHeader();
+                    if (br.header.keyword == "PARAMS" && br.header.count == NLIST)
+                    {
+                        DATA.Add(br.ReadFloatList(NLIST));
+                        continue;
+                    }
+                    br.SkipEclipseData();
+                }
+            }
+            br.CloseBinaryFile();
+            NTIME = DATA.Count;
+            TINDEX = Array.IndexOf(KEYWORDS, "TIME");
         }
     }
 }

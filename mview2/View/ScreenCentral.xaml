@@ -6,17 +6,43 @@
         xmlns:local="clr-namespace:mview2"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="350" Width="525" WindowStartupLocation="CenterScreen" FontSize="10">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="120"/>
+            <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Button Grid.Row="0" Grid.Column="0" Content="Open model" Click="OpenModel" />
-        <oxy:PlotView Grid.Column="0" Model="{Binding PlotModel}" Grid.Row="1" Grid.ColumnSpan="2"/>
+        
+        <!-- Menu Line -->
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal">
+                <Button Content="Open model" Click="OpenModel" Margin="4" Padding="12,4,12,4"/>
+
+            </StackPanel>
+       </Grid>
+        
+        <ComboBox Name="boxNameOptions" Grid.Row="1" Grid.Column="0" Margin="4,8,4,8" Padding="4" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="2">
+            <ComboBoxItem Content="Field"/>
+            <ComboBoxItem Content="Groups"/>
+            <ComboBoxItem Content="Wells"/>
+            <ComboBoxItem Content="Aquifers"/>
+            <ComboBoxItem Content="Region"/>
+            <ComboBoxItem Content="Others"/>
+        </ComboBox>
+        <ListBox Grid.Column="0" Grid.Row="2" Margin="4,0,4,8" ItemsSource="{Binding ListNames}" SelectionChanged="ListBox_SelectionChanged" />
+        <oxy:PlotView Grid.Column="1" Grid.Row="2"  Model="{Binding PlotModel}" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>

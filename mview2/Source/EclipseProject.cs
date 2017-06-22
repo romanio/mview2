@@ -89,6 +89,8 @@ namespace mview2
             {
                 SUMMARY = new Summary(FILES["SMSPEC"]);
                 ProceedSUMMARY();
+                if (FILES["UNSMRY"] != null)
+                    SUMMARY.ReadUNSMRY(FILES["UNSMRY"]);
             }
         }
 
@@ -99,24 +101,104 @@ namespace mview2
             for (int iw = 0; iw < SUMMARY.KEYWORDS.Length; ++iw)
             {
                 if (SUMMARY.KEYWORDS[iw].StartsWith("F"))
-                    temp.Add(new Vector { Type = NameOptions.Field, Name = SUMMARY.WGNAMES[iw] });
+                    temp.Add(new Vector
+                    {
+                        Type = NameOptions.Field,
+                        Name = SUMMARY.WGNAMES[iw],
+                        Data = new List<VectorData>()
+                        {
+                            new VectorData
+                            {
+                                index = iw,
+                                keyword = SUMMARY.KEYWORDS[iw],
+                                unit = SUMMARY.WGUNITS[iw]??"",
+                                measurement = SUMMARY.MEASRMNT[iw]??""
+                            }
+                        }
+                    });
 
                 if (SUMMARY.KEYWORDS[iw].StartsWith("W"))
-                    temp.Add(new Vector { Type = NameOptions.Well, Name = SUMMARY.WGNAMES[iw] });
+                    temp.Add(new Vector
+                    {
+                        Type = NameOptions.Well,
+                        Name = SUMMARY.WGNAMES[iw],
+                        Data = new List<VectorData>()
+                        {
+                            new VectorData
+                            {
+                                index = iw,
+                                keyword = SUMMARY.KEYWORDS[iw],
+                                unit = SUMMARY.WGUNITS[iw]??"",
+                                measurement = SUMMARY.MEASRMNT[iw]??""
+                            }
+                        }
+                    });
 
                 if (SUMMARY.KEYWORDS[iw].StartsWith("G"))
-                    temp.Add(new Vector { Type = NameOptions.Group, Name = SUMMARY.WGNAMES[iw] });
+                    temp.Add(new Vector
+                    {
+                        Type = NameOptions.Group,
+                        Name = SUMMARY.WGNAMES[iw],
+                        Data = new List<VectorData>()
+                        {
+                            new VectorData
+                            {
+                                index = iw,
+                                keyword = SUMMARY.KEYWORDS[iw],
+                                unit = SUMMARY.WGUNITS[iw]??"",
+                                measurement = SUMMARY.MEASRMNT[iw]??""
+                            }
+                        }
+                    });
 
                 if (SUMMARY.KEYWORDS[iw].StartsWith("A"))
-                    temp.Add(new Vector { Type = NameOptions.Aquifer, Name = SUMMARY.WGNAMES[iw] + SUMMARY.NUMS[iw].ToString() });
+                    temp.Add(new Vector
+                    {
+                        Type = NameOptions.Aquifer,
+                        Name = "A" + SUMMARY.NUMS[iw].ToString(),
+                        Data = new List<VectorData>()
+                        {
+                            new VectorData
+                            {
+                                index = iw,
+                                keyword = SUMMARY.KEYWORDS[iw],
+                                unit = SUMMARY.WGUNITS[iw]??"",
+                                measurement = SUMMARY.MEASRMNT[iw]??""
+                            }
+                        }
+                    });
 
                 if (SUMMARY.KEYWORDS[iw].StartsWith("R"))
-                    temp.Add(new Vector { Type = NameOptions.Aquifer, Name = SUMMARY.WGNAMES[iw] + SUMMARY.NUMS[iw].ToString() });
+                    temp.Add(new Vector
+                    {
+                        Type = NameOptions.Region,
+                        Name = "R" + SUMMARY.NUMS[iw].ToString(),
+                        Data = new List<VectorData>()
+                        {
+                            new VectorData
+                            {
+                                index = iw,
+                                keyword = SUMMARY.KEYWORDS[iw],
+                                unit = SUMMARY.WGUNITS[iw]??"",
+                                measurement = SUMMARY.MEASRMNT[iw]??""
+                            }
+                        }
+                    });
             }
 
-            // Удаляем повторяющиеся элементы
+            VECTORS = new List<Vector>();
 
-            VECTORS = temp.GroupBy(c => new { c.Name, c.Type, c.Num }).Select(g => g.First()).ToList();
+            foreach (var item in temp.GroupBy(c => new { c.Name, c.Type, c.Num }))
+            {
+                VECTORS.Add(
+                    new Vector
+                    {
+                        Name = item.Key.Name,
+                        Type = item.Key.Type,
+                        Num = item.Key.Num,
+                        Data = item.Select(c => c.Data[0]).ToList()
+                    });
+            }
         }
     }
 }

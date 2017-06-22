@@ -142,6 +142,55 @@ namespace mview2
             return SwapInt32(br.ReadInt32());
         }
 
+        unsafe public float[] ReadFloatList(int count)
+        {
+            // Процедура аналогична ReadIntList
+            float[] list = new float[header.count];
+
+            int index = 0;
+            int bindex = 0;
+            int block = count / 1000;
+            int mod = count - block * 1000;
+
+            int buflen = 0;
+            if (block > 0)
+                buflen = (2 * 4 + 4000) * block;
+            if (mod > 0)
+                buflen += 2 * 4 + 4 * mod;
+
+            byte[] nums = br.ReadBytes(buflen);
+            Position += buflen;
+            int local;
+
+            while (block > 0)
+            {
+                bindex += 4;
+
+                for (int iw = 0; iw < 1000; ++iw)
+                {
+                    local = (nums[bindex + 3]) | (nums[bindex + 2] << 8) | (nums[bindex + 1] << 0x10) | (nums[bindex] << 0x18);
+                    list[index++] = *(float*)(&local);
+                    bindex += 4;
+                }
+                bindex += 4;
+                block--;
+            }
+
+            if (mod > 0)
+            {
+                bindex += 4;
+                while (mod > 0)
+                {
+                    local = (nums[bindex + 3]) | (nums[bindex + 2] << 8) | (nums[bindex + 1] << 0x10) | (nums[bindex] << 0x18);
+                    list[index++] = *(float*)(&local);
+                    bindex += 4;
+                    mod--;
+                }
+                bindex += 4;
+            }
+            return list;
+        }
+
         public int[] ReadIntList()
         {
             // Считывания массива целых чисел. Вариант кажется мне самым быстрым

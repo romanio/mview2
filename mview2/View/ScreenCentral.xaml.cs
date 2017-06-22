@@ -42,8 +42,28 @@ namespace mview2
 
             if (ofd.ShowDialog() == true)
             {
-                ecl.OpenData(ofd.FileName);
+                Model.OpenModel(ofd.FileName);
             }
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (boxNameOptions.SelectedIndex == 0) Model.UpdateListNames(NameOptions.Field);
+            if (boxNameOptions.SelectedIndex == 1) Model.UpdateListNames(NameOptions.Group);
+            if (boxNameOptions.SelectedIndex == 2) Model.UpdateListNames(NameOptions.Well);
+            if (boxNameOptions.SelectedIndex == 3) Model.UpdateListNames(NameOptions.Aquifer);
+            if (boxNameOptions.SelectedIndex == 4) Model.UpdateListNames(NameOptions.Region);
+            if (boxNameOptions.SelectedIndex == 5) Model.UpdateListNames(NameOptions.Other);
+        }
+
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            List<string> selection = new List<string>();
+            foreach(string item in e.AddedItems)
+            {
+                selection.Add(item.ToString());
+            }
+            Model.UpdateSelectedNames(selection);
         }
     }
 }
