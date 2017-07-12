@@ -191,6 +191,55 @@ namespace mview2
             return list;
         }
 
+        unsafe public BigArray<float> ReadBigList(ulong count)
+        {
+            // Процедура аналогична ReadIntList
+            BigArray<float> list = new BigArray<float>(count);
+            byte[] nums_const = new byte[2 * 4 + 4000];
+
+            ulong index = 0;
+            int bindex = 0;
+            int block = (int)(count / 1000);
+            int mod = (int)(count - (ulong)(block * 1000));
+
+            long buflen = 0;
+            if (block > 0)
+                buflen = (2 * 4 + 4000) * block;
+            if (mod > 0)
+                buflen += 2 * 4 + 4 * mod;
+
+            Position += buflen;
+            int local;
+
+            while (block > 0)
+            {
+                nums_const = br.ReadBytes(2 * 4 + 4000);
+                bindex = 4;
+
+                for (int iw = 0; iw < 1000; ++iw)
+                {
+                    local = (nums_const[bindex + 3]) | (nums_const[bindex + 2] << 8) | (nums_const[bindex + 1] << 0x10) | (nums_const[bindex] << 0x18);
+                    list[index++] = *(float*)(&local);
+                    bindex += 4;
+                }
+                block--;
+            }
+
+            if (mod > 0)
+            {
+                br.ReadBytes(2 * 4 + 4 * mod);
+                bindex = 4;
+                while (mod > 0)
+                {
+                    local = (nums_const[bindex + 3]) | (nums_const[bindex + 2] << 8) | (nums_const[bindex + 1] << 0x10) | (nums_const[bindex] << 0x18);
+                    list[index++] = *(float*)(&local);
+                    bindex += 4;
+                    mod--;
+                }
+            }
+            return list;
+        }
+
         public int[] ReadIntList()
         {
             // Считывания массива целых чисел. Вариант кажется мне самым быстрым

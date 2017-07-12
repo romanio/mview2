@@ -49,8 +49,10 @@ namespace mview2
         public string ROOT;
         public string PATH;
         public Dictionary<string, string> FILES;
-        public Summary SUMMARY = null;
         public List<Vector> VECTORS = null;
+        public SMSPEC SUMMARY = null;
+        public RSSPEC RESTART = null;
+        public EGRID EGRID = null;
 
 
         public void OpenData(string filename)
@@ -85,13 +87,17 @@ namespace mview2
                 }
             }
 
-            if (FILES["SMSPEC"] != null)
+            if (FILES.ContainsKey("SMSPEC"))
             {
-                SUMMARY = new Summary(FILES["SMSPEC"]);
+                SUMMARY = new SMSPEC(FILES["SMSPEC"]);
                 ProceedSUMMARY();
-                if (FILES["UNSMRY"] != null)
-                    SUMMARY.ReadUNSMRY(FILES["UNSMRY"]);
             }
+
+            if (FILES.ContainsKey("RSSPEC"))
+            {
+                RESTART = new RSSPEC(FILES["RSSPEC"]);
+            }
+
         }
 
         void ProceedSUMMARY()

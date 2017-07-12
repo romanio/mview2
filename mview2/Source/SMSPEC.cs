@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace mview2
 {
-    public class Summary
+    public class SMSPEC
     {
         public DateTime STARTDATE; // Начальная дата расчёта
         public int NLIST; // Количество векторов, которое записано на каждый временный шаг
@@ -24,7 +24,7 @@ namespace mview2
         public int TINDEX; // Индекс вектора TIME
         public int NTIME; // Количество временных шагов
 
-        public Summary(string filename)
+        public SMSPEC(string filename)
         {
             FileReader br = new FileReader();
             br.OpenBinaryFile(filename);

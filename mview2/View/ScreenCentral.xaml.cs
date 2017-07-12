@@ -1,20 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Microsoft.Win32;
-using OxyPlot;
-using OxyPlot.Series;
+using OpenTK;
+
 
 namespace mview2
 {
@@ -25,45 +16,112 @@ namespace mview2
     {
         ScreenCentralModel Model = new ScreenCentralModel();
 
+        private GLControl glControl;
+
         public ScreenCentral()
         {
             InitializeComponent();
+
+            glControl = new GLControl();
+            glControl.MouseMove += GlControl_MouseMove;
+            glControl.MouseClick += GlControl_MouseClick;
+            glControl.Paint += GlControl_Paint;
+            glControl.MouseWheel += GlControl_MouseWheel;
+            glControl.Resize += GlControl_Resize;
+            glControl.Load += GlControl_Load;
+            HostGL.Child = this.glControl;
             this.DataContext = Model;
         }
 
-        EclipseProject ecl = new EclipseProject();
+        private void GlControl_Load(object sender, EventArgs e)
+        {
+            Model.Engine2D.Load();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Model.Engine2D.Unload();
+        }
+        private void GlControl_Resize(object sender, EventArgs e)
+        {
+            Model.Engine2D.Resize(glControl.Width, glControl.Height);
+            glControl.SwapBuffers();
+        }
+
+        private void GlControl_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            Model.Engine2D.MouseWheel(e);
+            Model.Engine2D.Paint();
+            glControl.SwapBuffers();
+        }
+
+        private void GlControl_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            Model.Engine2D.Paint();
+            glControl.SwapBuffers();
+        }
+
+        private void GlControl_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            Model.Engine2D.MouseClick(e);
+            Model.Engine2D.Paint();
+            glControl.SwapBuffers();
+        }
+
+        private void GlControl_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            Model.Engine2D.MouseMove(e);
+            Model.Engine2D.Paint();
+            glControl.SwapBuffers();
+        }
 
         private void OpenModel(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog()
+            Microsoft.Win32.OpenFileDialog fileDialog = new Microsoft.Win32.OpenFileDialog() { Filter = "Eclipse file|*.SMSPEC" };
+            if (fileDialog.ShowDialog() == true)
             {
-                Filter = "Eclipse file|*.SMSPEC"
-            };
-
-            if (ofd.ShowDialog() == true)
-            {
-                Model.OpenModel(ofd.FileName);
+                Model.OpenModel(fileDialog.FileName);
             }
         }
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (boxNameOptions.SelectedIndex == 0) Model.UpdateListNames(NameOptions.Field);
-            if (boxNameOptions.SelectedIndex == 1) Model.UpdateListNames(NameOptions.Group);
-            if (boxNameOptions.SelectedIndex == 2) Model.UpdateListNames(NameOptions.Well);
-            if (boxNameOptions.SelectedIndex == 3) Model.UpdateListNames(NameOptions.Aquifer);
-            if (boxNameOptions.SelectedIndex == 4) Model.UpdateListNames(NameOptions.Region);
-            if (boxNameOptions.SelectedIndex == 5) Model.UpdateListNames(NameOptions.Other);
+            switch (boxNameOptions.SelectedIndex)
+            {
+                case 0:
+                    Model.UpdateListNames(NameOptions.Field);
+                    break;
+                case 1:
+                    Model.UpdateListNames(NameOptions.Group);
+                    break;
+                case 2:
+                    Model.UpdateListNames(NameOptions.Well);
+                    break;
+                case 3:
+                    Model.UpdateListNames(NameOptions.Aquifer);
+                    break;
+                case 4:
+                    Model.UpdateListNames(NameOptions.Region);
+                    break;
+                case 5:
+                    Model.UpdateListNames(NameOptions.Other);
+                    break;
+            }
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            List<string> selection = new List<string>();
-            foreach(string item in e.AddedItems)
+            var selection = new List<string>();
+            foreach (string item in ((System.Windows.Controls.ListBox)sender).SelectedItems)
             {
                 selection.Add(item.ToString());
             }
             Model.UpdateSelectedNames(selection);
+        }
+
+        private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }
