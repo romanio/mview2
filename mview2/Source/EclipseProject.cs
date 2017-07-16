@@ -52,6 +52,7 @@ namespace mview2
         public List<Vector> VECTORS = null;
         public SMSPEC SUMMARY = null;
         public RSSPEC RESTART = null;
+        public INSPEC INIT = null;
         public EGRID EGRID = null;
 
 
@@ -98,6 +99,38 @@ namespace mview2
                 RESTART = new RSSPEC(FILES["RSSPEC"]);
             }
 
+            if (FILES.ContainsKey("INSPEC"))
+            {
+                INIT = new INSPEC(FILES["INSPEC"]);
+            }
+        }
+
+        public void ReadInit()
+        {
+            if (FILES.ContainsKey("INIT"))
+            {
+                INIT.ReadInit(FILES["INIT"]);
+            }
+        }
+
+        public void ReadRestart(int step)
+        {
+            // Открывает исходный файл в зависимости от унифицированного или нет формата записи
+
+            if (RESTART.TYPE_RESTART[step] == 0)
+            {
+                // Случай, если расчет задан "рассыпухой"
+                string ext = ".X" + RESTART.REPORT[step].ToString().PadLeft(4, '0');
+                if (FILES.ContainsKey(ext))
+                {
+                    RESTART.ReadRestart(FILES[ext], step);
+                }
+            }
+            else
+            if (FILES.ContainsKey("UNRST"))
+            {
+                RESTART.ReadRestart(FILES["UNRST"], step);
+            }
         }
 
         void ProceedSUMMARY()

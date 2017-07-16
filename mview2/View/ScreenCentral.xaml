@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:mview2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
+        Title="MainWindow" Height="566" Width="714" WindowStartupLocation="CenterScreen" Closing="Window_Closing" >
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -25,29 +25,53 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal">
-                <Button Content="Open model" Click="OpenModel" Margin="4" Padding="12,4,12,4"/>
+                <Button Content="Open model" Click="OpenModel" Margin="8,4,8,4" Padding="12,4,12,4" MinWidth="100"/>
             </StackPanel>
         </Grid>
 
         <!-- -->
 
         <TabControl Grid.Row="2" Grid.Column="0" Margin="8">
-            <TabItem Header="Restarts">
+            <TabItem Header="RESTARTS">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition />
+                        <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Column="0" Grid.Row="1">
-                        <Label Content="Dates" />
-                        <ComboBox ItemsSource="{Binding RestartDates}" 
-                                  SelectionChanged="ComboBox_SelectionChanged_1"/>
-                    </StackPanel>
+                    <!-- Левая панель -->
+                    <Grid Grid.Column="0" Grid.Row="1" MinWidth="120" Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Label Content="Dates" Grid.Row="0"/>
+                        <ComboBox ItemsSource="{Binding RestartDates}" SelectionChanged="OnRestartDateSelect" Grid.Row="1"/>
+                        <Label Content="Well names" Grid.Row="2"/>
+                        <ListBox ItemsSource="{Binding RestartWellnames}" SelectionMode="Extended" ScrollViewer.VerticalScrollBarVisibility ="Auto" Grid.Row="3"/>
+                    </Grid>
                     <WindowsFormsHost x:Name="HostGL" Grid.Column="1" Grid.Row="1"/>
+                    <!-- Правая панель -->
+                    <Grid Grid.Column="2" Grid.Row="1" MinWidth="120" Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Label Content="Dates" Grid.Row="0"/>
+                        <Expander Grid.Row="1" Header="FILTERS">
+                            <ComboBox ItemsSource="{Binding RestartDates}" SelectionChanged="OnRestartDateSelect" />
+                        </Expander>
+                        <Label Content="Well names" Grid.Row="2"/>
+                        <ListBox ItemsSource="{Binding RestartWellnames}" SelectionMode="Extended" ScrollViewer.VerticalScrollBarVisibility ="Auto" Grid.Row="3"/>
+                    </Grid>
                 </Grid>
             </TabItem>
             <TabItem Header="Vectors">

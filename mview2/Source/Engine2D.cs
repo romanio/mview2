@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -26,6 +23,13 @@ namespace mview2
             GL.Translate(shX + shXEnd - shXStart, -shY + shYEnd - shYStart, 0); // Сдвиг за счет мышки
             GL.Translate((-xmin - 0.5 * (xmax - xmin)), (-ymin - 0.5 * (ymax - ymin)), 0); // Центрирование
 
+            if (WellData != null)
+            {
+                // Отрисовка скважин и прочего
+                render.Clear(Color.Transparent);
+                WellInfoRender();
+            }
+
             // Отрисовка ячеек
 
             GL.PolygonOffset(+1, +1);
@@ -33,11 +37,13 @@ namespace mview2
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.DrawElements(PrimitiveType.Quads, ElementCount, DrawElementsType.UnsignedInt, 0);
 
+            /*
             GL.PolygonOffset(0, 0);
             GL.DisableClientState(ArrayCap.ColorArray);
             GL.Color3(Color.Black);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.DrawElements(PrimitiveType.Quads, ElementCount, DrawElementsType.UnsignedInt, 0);
+            */
 
             // Рамка
 
@@ -54,6 +60,31 @@ namespace mview2
             GL.Vertex3(xmax, ymin, 0);
             GL.Vertex3(xmin, ymin, 0);
             GL.End();
+
+            if (WellData != null)
+            {
+                // Вывод текста текстурой
+                GL.Enable(EnableCap.Texture2D);
+                GL.BindTexture(TextureTarget.Texture2D, render.Texture);
+
+                GL.LoadIdentity();
+
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+
+                GL.Begin(PrimitiveType.Quads);
+                GL.Color4(Color.White);
+
+                GL.TexCoord2(0, 1); GL.Vertex3(-0.5 * width, +0.5 * height, +0.3);
+                GL.TexCoord2(1, 1); GL.Vertex3(+0.5 * width, +0.5 * height, +0.3);
+                GL.TexCoord2(1, 0); GL.Vertex3(+0.5 * width, -0.5 * height, +0.3);
+                GL.TexCoord2(0, 0); GL.Vertex3(-0.5 * width, -0.5 * height, +0.3);
+
+                GL.End();
+
+                GL.Disable(EnableCap.Blend);
+                GL.Disable(EnableCap.Texture2D);
+            }
         }
 
         public int width, height; // Параметры окна вывода
@@ -100,10 +131,8 @@ namespace mview2
             GL.Ortho(-0.5 * width, +0.5 * width, +0.5 * height, -0.5 * height, -1, +1);
             GL.Viewport(0, 0, width, height);
 
-            /*
             if (render != null) render.Dispose(); // Удаляем старый рендер текста
-            render = new TextRender(Width, Height); // И объявляем новый
-            */
+            render = new TextRender(width, height); // И объявляем новый
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
@@ -185,6 +214,119 @@ namespace mview2
 
         EGRID egrid;
         int ElementCount;
+
+        public void GenerateEasyStructure(int NX, int NY, int NZ, float[] DATA, int[] ACTNUM)
+        {
+            IntPtr VertexIntPtr;
+            IntPtr ElementIntPtr;
+            Colorizer Colorizer = new Colorizer();
+
+            float DX = 50;
+            float av_value;
+            int av_index;
+
+            int index = 0;
+            Color color;
+
+            GL.BufferData(
+                BufferTarget.ArrayBuffer,
+                (IntPtr)(NX * NY * sizeof(float) * 3 * 4 + NX * NY * sizeof(byte) * 4 * 3),
+                IntPtr.Zero, BufferUsageHint.StaticDraw);
+
+            VertexIntPtr = GL.MapBuffer(
+                BufferTarget.ArrayBuffer, BufferAccess.ReadWrite);
+
+            GL.BufferData(
+                BufferTarget.ElementArrayBuffer,
+                (IntPtr)(NX * NY * sizeof(int) * 4), IntPtr.Zero, BufferUsageHint.StaticDraw);
+
+            ElementIntPtr = GL.MapBuffer(BufferTarget.ElementArrayBuffer, BufferAccess.ReadWrite);
+
+            GL.VertexPointer(3, VertexPointerType.Float, 0, 0);
+            GL.ColorPointer(3, ColorPointerType.UnsignedByte, 0, NX * NY * sizeof(float) * 3 * 4);
+
+            Colorizer.MaxValue = 350;
+            Colorizer.MinValue = 250;
+
+            unsafe
+            {
+                float* vertexMemory = (float*)VertexIntPtr;
+                int* indexMemory = (int*)ElementIntPtr;
+                byte* colorMemory = (byte*)(VertexIntPtr + NX * NY * sizeof(float) * 3 * 4);
+
+                for (int X = 0; X < NX; ++X)
+                    for (int Y = 0; Y < NY; ++Y)
+                    {
+                        // Определяем значение в I J координате
+                        av_index = 0;
+                        av_value = 0;
+
+                        for (int Z = 0; Z < NZ; ++Z)
+                        {
+                            if (ACTNUM[X + NX * Y + Z * NX * NY] > 0)
+                            {
+                                av_value += DATA[ACTNUM[X + NX * Y + Z * NX * NY] - 1];
+                                av_index++;
+                            }
+                        }
+
+                        if (av_index > 0) av_value = av_value / av_index;
+
+
+                        if (av_value > 0)
+                        {
+                            color = Colorizer.ColorByValue(av_value);
+
+                            indexMemory[index] = index;
+                            vertexMemory[index * 3 + 0] = X * DX;
+                            vertexMemory[index * 3 + 1] = Y * DX;
+                            vertexMemory[index * 3 + 2] = 0.1f;
+
+                            colorMemory[index * 3 + 0] = color.R;
+                            colorMemory[index * 3 + 1] = color.G;
+                            colorMemory[index * 3 + 2] = color.B;
+
+                            index++;
+
+                            indexMemory[index] = index;
+                            vertexMemory[index * 3 + 0] = (X + 1) * DX;
+                            vertexMemory[index * 3 + 1] = Y * DX;
+                            vertexMemory[index * 3 + 2] = 0.1f;
+
+                            colorMemory[index * 3 + 0] = color.R;
+                            colorMemory[index * 3 + 1] = color.G;
+                            colorMemory[index * 3 + 2] = color.B;
+
+                            index++;
+
+                            indexMemory[index] = index;
+                            vertexMemory[index * 3 + 0] = (X + 1) * DX;
+                            vertexMemory[index * 3 + 1] = (Y + 1) * DX;
+                            vertexMemory[index * 3 + 2] = 0.1f;
+
+                            colorMemory[index * 3 + 0] = color.R;
+                            colorMemory[index * 3 + 1] = color.G;
+                            colorMemory[index * 3 + 2] = color.B;
+
+                            index++;
+
+                            indexMemory[index] = index;
+                            vertexMemory[index * 3 + 0] = X * DX;
+                            vertexMemory[index * 3 + 1] = (Y + 1) * DX;
+                            vertexMemory[index * 3 + 2] = 0.1f;
+
+                            colorMemory[index * 3 + 0] = color.R;
+                            colorMemory[index * 3 + 1] = color.G;
+                            colorMemory[index * 3 + 2] = color.B;
+
+                            index++;
+                        }
+                    }
+            }
+            GL.UnmapBuffer(BufferTarget.ArrayBuffer);
+            GL.UnmapBuffer(BufferTarget.ElementArrayBuffer);
+            ElementCount = index;
+        }
 
         public void GenerateStructure(EGRID _egrid)
         {
@@ -278,14 +420,10 @@ namespace mview2
                         }
                     }
             }
-
             GL.UnmapBuffer(BufferTarget.ArrayBuffer);
             GL.UnmapBuffer(BufferTarget.ElementArrayBuffer);
-
             ElementCount = index;
-
         }
-
 
         public int GetCellIndex(int column, int row, int layer)
         {
@@ -446,5 +584,33 @@ namespace mview2
             return CELL;
         }
 
+        TextRender render;
+        Font Serif = new Font("Tahoma", 12, FontStyle.Regular);
+
+        public List<WELLDATA> WellData { get; set; }
+
+        public void WellInfoRender()
+        {
+            float XC, YC;
+            float XS, YS;
+            float DX = 50;
+
+            foreach (var item in WellData)
+            {
+                XC = item.I * DX + 0.5f * DX;
+                YC = item.J * DX + 0.5f * DX;
+
+                GL.PointSize(7);
+                GL.Color3(Color.Black);
+                GL.Begin(PrimitiveType.Points);
+                GL.Vertex3(XC, YC, 0.2);
+                GL.End();
+
+                XS = (XC - xmin - 0.5f * (xmax - xmin) + shX + shXEnd - shXStart) * scale + 0.5f * width;
+                YS = (YC - ymin - 0.5f * (ymax - ymin) - shY + shYEnd - shYStart) * scale + 0.5f * height;
+
+                render.DrawString(item.WELLNAME, Serif, Brushes.Black, new PointF(XS, YS));
+            }
+        }
     }
 }

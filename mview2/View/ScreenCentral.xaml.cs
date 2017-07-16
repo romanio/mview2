@@ -119,9 +119,10 @@ namespace mview2
             Model.UpdateSelectedNames(selection);
         }
 
-        private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        private void OnRestartDateSelect(object sender, SelectionChangedEventArgs e)
         {
-
+            Model.OnRestartDateSelect(((System.Windows.Controls.ComboBox)sender).SelectedIndex);
         }
+
     }
 }

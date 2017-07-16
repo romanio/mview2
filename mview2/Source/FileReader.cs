@@ -30,6 +30,11 @@ namespace mview2
             Length = fs.Length;
             Position = 0;
         }
+        public void SetPosition(long position)
+        {
+            this.Position = position;
+            fs.Seek(position, SeekOrigin.Begin);
+        }
 
         public void CloseBinaryFile()
         {
@@ -140,6 +145,58 @@ namespace mview2
         {
             Position += 4;
             return SwapInt32(br.ReadInt32());
+        }
+
+        unsafe public double[] ReadDoubleList()
+        {
+            double[] list = new double[header.count];
+            int index = 0;
+            int bindex = 0;
+            int block = header.count / 1000;
+            int mod = header.count - block * 1000;
+
+            int buflen = 0;
+            if (block > 0)
+                buflen = (2 * 4 + 8000) * block;
+            if (mod > 0)
+                buflen += 2 * 4 + 8 * mod;
+
+            byte[] nums = br.ReadBytes(buflen);
+            Position += buflen;
+            ulong low, high, result;
+
+            while (block > 0)
+            {
+                bindex += 4;
+                for (int iw = 0; iw < 1000; ++iw)
+                {
+                    low = 0x0000000ffffffff & (ulong)(((nums[bindex + 7] | (nums[bindex + 6] << 8)) | (nums[bindex + 5] << 0x10)) | (nums[bindex + 4] << 0x18));
+                    high = 0x0000000ffffffff & (ulong)(((nums[bindex + 3] | (nums[bindex + 2] << 8)) | (nums[bindex + 1] << 0x10)) | (nums[bindex + 0] << 0x18));
+                    result = (high << 0x20) | low;
+
+                    list[index++] = *((double*)&result);
+                    bindex += 8;
+                }
+
+                bindex += 4;
+                block--;
+            }
+            if (mod > 0)
+            {
+                bindex += 4;
+                while (mod > 0)
+                {
+                    low = 0x0000000ffffffff & (ulong)(((nums[bindex + 7] | (nums[bindex + 6] << 8)) | (nums[bindex + 5] << 0x10)) | (nums[bindex + 4] << 0x18));
+                    high = 0x0000000ffffffff & (ulong)(((nums[bindex + 3] | (nums[bindex + 2] << 8)) | (nums[bindex + 1] << 0x10)) | (nums[bindex + 0] << 0x18));
+                    result = (high << 0x20) | low;
+
+                    list[index++] = *((double*)&result);
+                    bindex += 8;
+                    mod--;
+                }
+                bindex += 4;
+            }
+            return list;
         }
 
         unsafe public float[] ReadFloatList(int count)
