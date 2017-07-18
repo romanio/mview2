@@ -103,6 +103,12 @@ namespace mview2
             {
                 INIT = new INSPEC(FILES["INSPEC"]);
             }
+
+            if (FILES.ContainsKey("EGRID"))
+            {
+                EGRID = new EGRID(FILES["EGRID"]);
+            }
+
         }
 
         public void ReadInit()

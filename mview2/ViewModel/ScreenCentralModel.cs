@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
-using OxyPlot;
-using OxyPlot.Series;
+using HelixToolkit.Wpf.SharpDX;
+using SharpDX;
 
 namespace mview2
 {
@@ -19,20 +19,56 @@ namespace mview2
         }
 
         public EclipseProject ECL = new EclipseProject();
-        public Engine2D Engine2D = new Engine2D();
+        public MeshGeometry3D Model { get; set; }
+
         public NameOptions ShowNameOptions;
         public List<string> ListNames { get; set; }
         public List<string> ListKeywords { get; set; }
-
         public List<string> RestartDates { get; set; }
         public List<string> RestartWellnames { get; set; }
 
         public void OpenModel(string filename)
         {
             ECL.OpenData(filename);
-            ECL.ReadInit();
-            UpdateRestartNames();
+            GenerateModel();
+            //ECL.ReadInit();
+           // UpdateRestartNames();
         }
+
+        public void GenerateModel()
+        {
+            int compress = 0;
+            MeshBuilder builder = new MeshBuilder();
+
+            /*
+            for (int X = 0; X < ECL.EGRID.NX; ++X)
+                for (int Y = 0; Y < ECL.EGRID.NY; ++Y)
+                    for (int Z = 0; Z < ECL.EGRID.NZ; ++Z)
+                    {
+                        if (ECL.EGRID.GetActive(X, Y, Z) > 0)
+                        {
+                            // Проверим окружение, есть ли соседние активные ячейки
+                            if (ECL.EGRID.CheckEasyNeighbour(X, Y, Z))
+                            {
+                                builder.AddBox(new Vector3(X * 10, Y * 10, Z * 10), 10, 10, 10);
+                            }
+                            else
+                                compress++;
+                            //var CELL = ECL.EGRID.GetCell(X, Y, 0);
+                            //builder.AddQuad(CELL.TNW, CELL.TNE, CELL.TSE, CELL.TSW);
+                        }
+                    }
+            */
+
+            builder.AddBox(new Vector3(0, 0, 0), 10, 10, 10, BoxFaces.All);
+            Model = builder.ToMeshGeometry3D();
+            //Model = new GeometryModel3D(builder.ToMesh(), MaterialHelper.CreateMaterial(Brushes.DarkRed));
+            //System.Diagnostics.Debug.WriteLine(compress);
+
+            
+            OnPropertyChanged("Model");
+        }
+
 
         public ScreenCentralModel()
         {
@@ -77,20 +113,6 @@ namespace mview2
             OnPropertyChanged("ListNames");
         }
 
-        void CalcModelLimits()
-        {
-            Engine2D.SetLimits(
-                ECL.EGRID.XORIGIN,
-                ECL.EGRID.XENDXAXIS,
-                ECL.EGRID.YORIGIN,
-                ECL.EGRID.YENDYAXIS);
-        }
-
-        void GenerateStructure()
-        {
-            Engine2D.GenerateStructure(ECL.EGRID);
-        }
-
         public void OnRestartDateSelect(int step)
         {
             ECL.ReadRestart(step);
@@ -107,10 +129,6 @@ namespace mview2
             //
 
             ECL.RESTART.ReadRestartGrid("PRESSURE");
-
-            Engine2D.WellData = ECL.RESTART.WELLS;
-            Engine2D.SetLimits(0, ECL.RESTART.NX * 50, 0, ECL.RESTART.NY * 50);
-            Engine2D.GenerateEasyStructure(ECL.RESTART.NX, ECL.RESTART.NY, ECL.RESTART.NZ, ECL.RESTART.DATA, ECL.INIT.ACTNUM);
         }
     }
 }

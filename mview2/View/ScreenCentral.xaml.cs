@@ -4,8 +4,6 @@ using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using OpenTK;
-
 
 namespace mview2
 {
@@ -16,63 +14,10 @@ namespace mview2
     {
         ScreenCentralModel Model = new ScreenCentralModel();
 
-        private GLControl glControl;
-
         public ScreenCentral()
         {
             InitializeComponent();
-
-            glControl = new GLControl();
-            glControl.MouseMove += GlControl_MouseMove;
-            glControl.MouseClick += GlControl_MouseClick;
-            glControl.Paint += GlControl_Paint;
-            glControl.MouseWheel += GlControl_MouseWheel;
-            glControl.Resize += GlControl_Resize;
-            glControl.Load += GlControl_Load;
-            HostGL.Child = this.glControl;
             this.DataContext = Model;
-        }
-
-        private void GlControl_Load(object sender, EventArgs e)
-        {
-            Model.Engine2D.Load();
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Model.Engine2D.Unload();
-        }
-        private void GlControl_Resize(object sender, EventArgs e)
-        {
-            Model.Engine2D.Resize(glControl.Width, glControl.Height);
-            glControl.SwapBuffers();
-        }
-
-        private void GlControl_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            Model.Engine2D.MouseWheel(e);
-            Model.Engine2D.Paint();
-            glControl.SwapBuffers();
-        }
-
-        private void GlControl_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
-        {
-            Model.Engine2D.Paint();
-            glControl.SwapBuffers();
-        }
-
-        private void GlControl_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            Model.Engine2D.MouseClick(e);
-            Model.Engine2D.Paint();
-            glControl.SwapBuffers();
-        }
-
-        private void GlControl_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            Model.Engine2D.MouseMove(e);
-            Model.Engine2D.Paint();
-            glControl.SwapBuffers();
         }
 
         private void OpenModel(object sender, RoutedEventArgs e)
@@ -81,6 +26,7 @@ namespace mview2
             if (fileDialog.ShowDialog() == true)
             {
                 Model.OpenModel(fileDialog.FileName);
+                view1.ZoomExtents();
             }
         }
 
