@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
-using HelixToolkit.Wpf.SharpDX;
-using SharpDX;
+using System.Windows.Media.Media3D;
+using HelixToolkit.Wpf;
+using System.Windows.Media;
+using System.Windows;
 
 namespace mview2
 {
@@ -19,7 +21,7 @@ namespace mview2
         }
 
         public EclipseProject ECL = new EclipseProject();
-        public MeshGeometry3D Model { get; set; }
+        public GeometryModel3D Model { get; set; }
 
         public NameOptions ShowNameOptions;
         public List<string> ListNames { get; set; }
@@ -38,9 +40,12 @@ namespace mview2
         public void GenerateModel()
         {
             int compress = 0;
-            MeshBuilder builder = new MeshBuilder();
+            int pos = 0;
+           
+            MeshGeometry3D g = new MeshGeometry3D();
+            
+            //MeshBuilder builder = new MeshBuilder();
 
-            /*
             for (int X = 0; X < ECL.EGRID.NX; ++X)
                 for (int Y = 0; Y < ECL.EGRID.NY; ++Y)
                     for (int Z = 0; Z < ECL.EGRID.NZ; ++Z)
@@ -48,24 +53,35 @@ namespace mview2
                         if (ECL.EGRID.GetActive(X, Y, Z) > 0)
                         {
                             // Проверим окружение, есть ли соседние активные ячейки
-                            if (ECL.EGRID.CheckEasyNeighbour(X, Y, Z))
-                            {
-                                builder.AddBox(new Vector3(X * 10, Y * 10, Z * 10), 10, 10, 10);
-                            }
-                            else
-                                compress++;
+                                g.Positions.Add(new Point3D(X * 10, Y * 10, Z * 5));
+                                g.Positions.Add(new Point3D(X * 10 + 10, Y * 10, Z * 5));
+                                g.Positions.Add(new Point3D(X * 10 + 10, Y * 10 + 10, Z * 5));
+
+                                g.TriangleIndices.Add(pos++);
+                                g.TriangleIndices.Add(pos++);
+                                g.TriangleIndices.Add(pos++);
+
+                            g.TextureCoordinates.Add(new Point(0, 0));
+                            g.TextureCoordinates.Add(new Point(0, 1));
+                            g.TextureCoordinates.Add(new Point(1, 1));
+                            //builder.AddBox(new Vector3(X * 10, Y * 10, Z * 10), 10, 10, 10);
                             //var CELL = ECL.EGRID.GetCell(X, Y, 0);
                             //builder.AddQuad(CELL.TNW, CELL.TNE, CELL.TSE, CELL.TSW);
                         }
                     }
-            */
 
-            builder.AddBox(new Vector3(0, 0, 0), 10, 10, 10, BoxFaces.All);
-            Model = builder.ToMeshGeometry3D();
-            //Model = new GeometryModel3D(builder.ToMesh(), MaterialHelper.CreateMaterial(Brushes.DarkRed));
+
+            LinearGradientBrush b = BrushHelper.CreateHsvBrush();
+            b.StartPoint = new Point(0, 0);
+            b.EndPoint = new Point(1, 1);
+            Model = new GeometryModel3D(g, MaterialHelper.CreateMaterial(b));
+
+            //builder.AddBox(new Vector3(0, 0, 0), 10, 10, 10, BoxFaces.All);
+            //Model = builder.ToMeshGeometry3D();
+            //Model = new GeometryModel3D(builder.ToMesh(),
             //System.Diagnostics.Debug.WriteLine(compress);
 
-            
+
             OnPropertyChanged("Model");
         }
 

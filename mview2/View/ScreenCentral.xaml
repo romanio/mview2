@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:helix="http://helix-toolkit.org/wpf/SharpDX"
+        xmlns:hx="http://helix-toolkit.org/wpf"
         xmlns:local="clr-namespace:mview2"
         mc:Ignorable="d"
         Title="MainWindow" Height="566" Width="714" WindowStartupLocation="CenterScreen" >
@@ -75,11 +75,11 @@
                         <Label Content="Well names" Grid.Row="2"/>
                         <ListBox ItemsSource="{Binding RestartWellnames}" SelectionMode="Extended" ScrollViewer.VerticalScrollBarVisibility ="Auto" Grid.Row="3"/>
                     </Grid>
-                    <helix:Viewport3DX Grid.Column="1" Grid.Row="1" Name="view1">
-                        <helix:AmbientLight3D/>
-
-                        <helix:MeshGeometryModel3D Geometry="{Binding Model}" />
-                    </helix:Viewport3DX>
+                
+                    <hx:HelixViewport3D Grid.Column="1" Grid.Row="1" Name="view1">
+                        <hx:DefaultLights/>
+                        <ModelVisual3D Content="{Binding Model}" />
+                    </hx:HelixViewport3D>
                 </Grid>
             </TabItem>
             <TabItem Header="Vectors">
