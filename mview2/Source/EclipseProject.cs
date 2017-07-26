@@ -54,8 +54,6 @@ namespace mview2
         public RSSPEC RESTART = null;
         public INSPEC INIT = null;
         public EGRID EGRID = null;
-
-
         public void OpenData(string filename)
         {
             // Следует разобраться со структурой файлов в директории
@@ -91,33 +89,36 @@ namespace mview2
             if (FILES.ContainsKey("SMSPEC"))
             {
                 SUMMARY = new SMSPEC(FILES["SMSPEC"]);
-                ProceedSUMMARY();
-            }
+             }
 
             if (FILES.ContainsKey("RSSPEC"))
             {
-                RESTART = new RSSPEC(FILES["RSSPEC"]);
+                 RESTART = new RSSPEC(FILES["RSSPEC"]);
             }
 
             if (FILES.ContainsKey("INSPEC"))
             {
-                INIT = new INSPEC(FILES["INSPEC"]);
+                 INIT = new INSPEC(FILES["INSPEC"]);
             }
 
+            /*
             if (FILES.ContainsKey("EGRID"))
             {
+                System.Diagnostics.Debug.WriteLine("Read EGRID " + FILES["EGRID"]);
+
                 EGRID = new EGRID(FILES["EGRID"]);
             }
-
+            */
         }
 
-        public void ReadInit()
+        public void ReadInitACTNUM()
         {
             if (FILES.ContainsKey("INIT"))
             {
-                INIT.ReadInit(FILES["INIT"]);
+                INIT.ReadACTNUM(FILES["INIT"]);
             }
         }
+
 
         public void ReadRestart(int step)
         {

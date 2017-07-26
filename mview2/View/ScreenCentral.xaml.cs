@@ -4,20 +4,23 @@ using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MahApps.Metro.Controls;
 
 namespace mview2
 {
-    /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
-    /// </summary>
-    public partial class ScreenCentral : Window
+    public partial class ScreenCentral : MetroWindow
     {
         ScreenCentralModel Model = new ScreenCentralModel();
 
         public ScreenCentral()
         {
-            InitializeComponent();
             this.DataContext = Model;
+            InitializeComponent();
+
+            view1.PanGesture2 = null;
+            view1.PanGesture.MouseAction = MouseAction.RightClick;
+            view1.PanGesture.Modifiers = ModifierKeys.None;
+            view1.RotateGesture.MouseAction = MouseAction.MiddleClick;
         }
 
         private void OpenModel(object sender, RoutedEventArgs e)
@@ -26,32 +29,15 @@ namespace mview2
             if (fileDialog.ShowDialog() == true)
             {
                 Model.OpenModel(fileDialog.FileName);
-                view1.ZoomExtents();
             }
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void OnOpenModel(object sender, RoutedEventArgs e)
         {
-            switch (boxNameOptions.SelectedIndex)
+            Microsoft.Win32.OpenFileDialog fileDialog = new Microsoft.Win32.OpenFileDialog() { Filter = "Eclipse file|*.SMSPEC" };
+            if (fileDialog.ShowDialog() == true)
             {
-                case 0:
-                    Model.UpdateListNames(NameOptions.Field);
-                    break;
-                case 1:
-                    Model.UpdateListNames(NameOptions.Group);
-                    break;
-                case 2:
-                    Model.UpdateListNames(NameOptions.Well);
-                    break;
-                case 3:
-                    Model.UpdateListNames(NameOptions.Aquifer);
-                    break;
-                case 4:
-                    Model.UpdateListNames(NameOptions.Region);
-                    break;
-                case 5:
-                    Model.UpdateListNames(NameOptions.Other);
-                    break;
+                Model.OpenModel(fileDialog.FileName);
             }
         }
 
@@ -68,7 +54,19 @@ namespace mview2
         private void OnRestartDateSelect(object sender, SelectionChangedEventArgs e)
         {
             Model.OnRestartDateSelect(((System.Windows.Controls.ComboBox)sender).SelectedIndex);
+
         }
 
+        private void OnStaticListSelected(object sender, RoutedEventArgs e)
+        {
+            string name = ((TreeViewItem)e.OriginalSource).Header.ToString();
+            if (name != "STATIC")
+                Model.OnStaticPropertySelected(name);
+        }
+
+        private void OnViewAll(object sender, RoutedEventArgs e)
+        {
+            view1.ZoomExtents();
+        }
     }
 }

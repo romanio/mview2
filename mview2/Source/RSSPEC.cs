@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace mview2
 {
@@ -36,7 +33,6 @@ namespace mview2
         public double WWPTH;
         public double WWITH;
     }
-
     public class RSSPEC
     {
         public List<double> TIME = new List<double>(); // Количество дней с начала расчёта
@@ -259,6 +255,11 @@ namespace mview2
                 WELLS[iw].WELLNAME = ZWEL[iw * NZWELZ + 0];
             }
             br.CloseBinaryFile();
+        }
+
+        public float GetValue(int index)
+        {
+            return DATA[index];
         }
 
         public void ReadRestartGrid(string property)
