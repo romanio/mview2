@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Windows.Media.Media3D;
-using HelixToolkit.Wpf;
 using System.Windows.Media;
 using System.Windows;
 
@@ -23,7 +22,7 @@ namespace mview2
         public EclipseProject ECL = new EclipseProject();
         public GeometryModel3D Model { get; set; } //GeometryModel3D
         public Point3DCollection Wells { get; set; }
-        public IList<SpatialTextItem> WellNamesItems { get; set; }
+
         public List<string> StaticListNames { get; set; }
         public List<string> DynamicListNames { get; set; }
         public List<string> LogItems { get; set; }
@@ -125,56 +124,59 @@ namespace mview2
 
             ECL.RESTART.ReadRestartGrid("OILKR");
 
-            int pos = 0;
-            float value = 1;
-            int count = 0;
-            int index = 0;
-
-            MeshGeometry3D g = new MeshGeometry3D();
-
-            for (int X = 0; X < ECL.INIT.NX; ++X)
-                for (int Y = 0; Y < ECL.INIT.NY; ++Y)
-                {
-                    count = 0;
-                    value = 0;
-
-                    for (int Z = 0; Z < ECL.INIT.NZ; ++Z)
-                    {
-                        index = ECL.INIT.GetActive(X, Y, Z);
-                        if (index > 0)
-                        {
-                            value += ECL.RESTART.GetValue(index - 1);
-                            count++;
-                        }
-                    }
-
-                    if (count > 0) value = (float)value / (float)count;
+            /*
+             
+int pos = 0;
+float value = 1;
+int count = 0;
+int index = 0;
 
 
-                    if (count > 0)
-                    {
-                        g.Positions.Add(new Point3D(X * 10 + 00, Y * 10 + 00, 05));  // 0
-                        g.Positions.Add(new Point3D(X * 10 + 10, Y * 10 + 00, 05)); // 1
-                        g.Positions.Add(new Point3D(X * 10 + 10, Y * 10 + 10, 05)); // 2
-                        g.Positions.Add(new Point3D(X * 10 + 00, Y * 10 + 10, 05)); //3
+MeshGeometry3D g = new MeshGeometry3D();
 
-                        g.TriangleIndices.Add(pos + 0); // 0 - 1 - 2
-                        g.TriangleIndices.Add(pos + 1);
-                        g.TriangleIndices.Add(pos + 2);
+for (int X = 0; X < ECL.INIT.NX; ++X)
+    for (int Y = 0; Y < ECL.INIT.NY; ++Y)
+    {
+        count = 0;
+        value = 0;
 
-                        g.TriangleIndices.Add(pos + 2); // 2 -  3 - 0
-                        g.TriangleIndices.Add(pos + 3);
-                        g.TriangleIndices.Add(pos + 0);
+        for (int Z = 0; Z < ECL.INIT.NZ; ++Z)
+        {
+            index = ECL.INIT.GetActive(X, Y, Z);
+            if (index > 0)
+            {
+                value += ECL.RESTART.GetValue(index - 1);
+                count++;
+            }
+        }
 
-                        pos = pos + 4;
+        if (count > 0) value = (float)value / (float)count;
 
-                        g.TextureCoordinates.Add(new Point(value, value));
-                        g.TextureCoordinates.Add(new Point(value, value));
-                        g.TextureCoordinates.Add(new Point(value, value));
-                        g.TextureCoordinates.Add(new Point(value, value));
-                    }
-                }
 
+        if (count > 0)
+        {
+            g.Positions.Add(new Point3D(X * 10 + 00, Y * 10 + 00, 05));  // 0
+            g.Positions.Add(new Point3D(X * 10 + 10, Y * 10 + 00, 05)); // 1
+            g.Positions.Add(new Point3D(X * 10 + 10, Y * 10 + 10, 05)); // 2
+            g.Positions.Add(new Point3D(X * 10 + 00, Y * 10 + 10, 05)); //3
+
+            g.TriangleIndices.Add(pos + 0); // 0 - 1 - 2
+            g.TriangleIndices.Add(pos + 1);
+            g.TriangleIndices.Add(pos + 2);
+
+            g.TriangleIndices.Add(pos + 2); // 2 -  3 - 0
+            g.TriangleIndices.Add(pos + 3);
+            g.TriangleIndices.Add(pos + 0);
+
+            pos = pos + 4;
+
+            g.TextureCoordinates.Add(new Point(value, value));
+            g.TextureCoordinates.Add(new Point(value, value));
+            g.TextureCoordinates.Add(new Point(value, value));
+            g.TextureCoordinates.Add(new Point(value, value));
+        }
+    }
+    */
             /*
             Wells = new Point3DCollection();
             WellNamesItems = new List<SpatialTextItem>();
@@ -192,12 +194,6 @@ namespace mview2
                 });
                 }
             */
-            LinearGradientBrush b = BrushHelper.CreateRainbowBrush();
-            b.StartPoint = new Point(0, 0);
-            b.EndPoint = new Point(1, 1);
-            b.MappingMode = BrushMappingMode.Absolute;
-            Model = new GeometryModel3D(g, MaterialHelper.CreateMaterial(b));
-
             OnPropertyChanged("Model");
             OnPropertyChanged("Wells");
             OnPropertyChanged("WellNamesItems");
@@ -207,6 +203,7 @@ namespace mview2
         {
             ECL.INIT.ReadInitGrid(name);
 
+            /*
             int pos = 0;
             float value = 1;
             int count = 0;
@@ -256,13 +253,7 @@ namespace mview2
                         g.TextureCoordinates.Add(new Point(value, value));
                     }
                 }
-            LinearGradientBrush b = BrushHelper.CreateRainbowBrush();
-            b.StartPoint = new Point(0, 0);
-            b.EndPoint = new Point(1, 1);
-            b.MappingMode = BrushMappingMode.Absolute;
-            Model = new GeometryModel3D(g, MaterialHelper.CreateMaterial(b));
-
-
+                */
             OnPropertyChanged("Model");
         }
     }

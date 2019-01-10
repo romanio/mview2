@@ -102,10 +102,16 @@ namespace mview2
                     int SDAY = br.ReadInt32();
                     int SMONTH = br.ReadInt32();
                     int SYEAR = br.ReadInt32();
-                    int SHOUR = br.ReadInt32();
-                    int SMINUTE = br.ReadInt32();
-                    int SSECOND = (int)(br.ReadInt32() * 1e6);
-                    STARTDATE = new DateTime(SYEAR, SMONTH, SDAY, SHOUR, SMINUTE, SSECOND);
+                    STARTDATE = new DateTime(SYEAR, SMONTH, SDAY);
+
+                    if (br.header.count == 6)
+                    {
+                        int SHOUR = br.ReadInt32();
+                        int SMINUTE = br.ReadInt32();
+                        int SSECOND = (int)(br.ReadInt32() * 1e6);
+                        STARTDATE = new DateTime(SYEAR, SMONTH, SDAY, SHOUR, SMINUTE, SSECOND);
+                    }
+
                     br.ReadBytes(4);
                     continue;
                 }

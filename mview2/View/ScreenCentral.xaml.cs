@@ -4,11 +4,10 @@ using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using MahApps.Metro.Controls;
 
 namespace mview2
 {
-    public partial class ScreenCentral : MetroWindow
+    public partial class ScreenCentral : Window
     {
         ScreenCentralModel Model = new ScreenCentralModel();
 
@@ -16,11 +15,6 @@ namespace mview2
         {
             this.DataContext = Model;
             InitializeComponent();
-
-            view1.PanGesture2 = null;
-            view1.PanGesture.MouseAction = MouseAction.RightClick;
-            view1.PanGesture.Modifiers = ModifierKeys.None;
-            view1.RotateGesture.MouseAction = MouseAction.MiddleClick;
         }
 
         private void OpenModel(object sender, RoutedEventArgs e)
@@ -66,7 +60,7 @@ namespace mview2
 
         private void OnViewAll(object sender, RoutedEventArgs e)
         {
-            view1.ZoomExtents();
+   
         }
     }
 }
