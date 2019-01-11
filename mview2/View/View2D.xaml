@@ -19,7 +19,7 @@
             Grid.Column="0"
             Grid.Row="0"
             Content="Press me"/>
-        <WindowsFormsHost 
+        <WindowsFormsHost Name="HostGL"
             Grid.Row="1"
             Grid.Column="0"/>
     </Grid>
